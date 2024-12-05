@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Cart } from '../schemas/cart.schema';
-import { AddToCartDto } from '../dtos/cart-cart.dto';
+import { AddToCartDto } from '../dtos/add-to-cart.dto';
 import { ServiceAttributesService } from 'src/modules/service-attributes/services/service-attributes.service';
 
 @Injectable()

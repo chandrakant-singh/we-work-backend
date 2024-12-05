@@ -7,10 +7,10 @@ import {
   Get,
   Delete,
   Request,
-//   UseGuards,
+  //   UseGuards,
 } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
-import { AddToCartDto } from '../dtos/cart-cart.dto';
+import { AddToCartDto } from '../dtos/add-to-cart.dto';
 // import { AuthGuard } from '@nestjs/passport';
 
 @Controller('cart')

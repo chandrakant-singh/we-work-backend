@@ -14,6 +14,7 @@ import { ServiceSubCategoryModule } from './modules/service-sub-category/service
 import { ServiceModule } from './modules/service/service.module';
 import { ServiceAttributesModule } from './modules/service-attributes/service-attributes.module';
 import { CartModule } from './modules/cart/cart.module';
+import { OrdersModule } from './modules/order/orders.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -37,6 +38,7 @@ import mongoose from 'mongoose';
     ServiceModule,
     ServiceAttributesModule,
     CartModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

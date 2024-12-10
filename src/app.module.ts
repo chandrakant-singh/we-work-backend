@@ -15,6 +15,7 @@ import { ServiceModule } from './modules/service/service.module';
 import { ServiceAttributesModule } from './modules/service-attributes/service-attributes.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrdersModule } from './modules/order/orders.module';
+import { QuotationsModule } from './modules/quotations/quotation.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -39,6 +40,7 @@ import mongoose from 'mongoose';
     ServiceAttributesModule,
     CartModule,
     OrdersModule,
+    QuotationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

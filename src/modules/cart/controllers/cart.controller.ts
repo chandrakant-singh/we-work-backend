@@ -1,16 +1,7 @@
-// cart.controller.ts
-import {
-  Controller,
-  Post,
-  Body,
-  Param,
-  Get,
-  Delete,
-  Request,
-  //   UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Delete } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
 import { AddToCartDto } from '../dtos/add-to-cart.dto';
+import { Public } from 'src/shared/decorators/public.decorator';
 // import { AuthGuard } from '@nestjs/passport';
 
 @Controller('cart')
@@ -18,19 +9,29 @@ import { AddToCartDto } from '../dtos/add-to-cart.dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
+  @Public()
   @Post('add/:userId')
-  addToCart(@Body() dto: AddToCartDto, @Request() req) {
-    console.log(req.params.userId);
-    return this.cartService.addToCart(req.params.userId, dto);
+  addToCart(@Body() dto: AddToCartDto, @Param('userId') userId: string) {
+    return this.cartService.addToCart(userId, dto);
   }
 
-  @Get()
-  getCart(@Request() req) {
-    return this.cartService.getCart(req.user.id);
+  @Public()
+  @Get('user/:userId')
+  getCart(@Param('userId') userId: string) {
+    return this.cartService.getCart(userId);
   }
 
   @Delete(':id')
-  removeFromCart(@Param('id') id: string, @Request() req) {
-    return this.cartService.removeFromCart(req.user.id, id);
+  removeFromCart(@Param('id') id: string) {
+    return this.cartService.delete(id);
+  }
+
+  @Public()
+  @Delete('user/:userId/sub-category/:subCategoryId')
+  removeItemFromCart(
+    @Param('userId') userId: string,
+    @Param('subCategoryId') subCategoryId: string,
+  ) {
+    return this.cartService.removeItemFromCart(userId, subCategoryId);
   }
 }

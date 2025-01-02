@@ -25,6 +25,16 @@ export class ServiceSubCategory extends Document {
     },
   })
   serviceCategoryId: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'services',
+    validate: {
+      validator: mongoose.isValidObjectId,
+      message: 'Invalid ObjectId for services',
+    },
+  })
+  serviceId: Types.ObjectId;
 }
 
 export const ServiceSubCategorySchema =

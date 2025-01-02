@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,9 +9,12 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
+
 import { User } from '../schemas/user.schema';
 import { UserDto } from '../dto/user.dto';
 import { UserProfile } from '../../user-profile/schemas/user-profile.schema';
+import { BcryptUtils } from 'src/shared/utils/jwt/bcrypt.utils';
 
 @Injectable()
 export class UserService {
@@ -20,63 +24,45 @@ export class UserService {
   ) { }
 
   async create(createUserDto: UserDto): Promise<User> {
-    // Create user
-    // const createdUser = new this.userModel(createUserDto);
-    // return createdUser.save();
-
-    // try {
-    //   console.log("createdUser", createUserDto);
-
-    //   const createdUser = new this.userModel(createUserDto);
-    //   console.log(createdUser);
-    //   return await createdUser.save();
-    // } catch (error) {
-    //   if (error.name === 'ValidationError') {
-    //     throw new BadRequestException(error.message); // Map to 400 error
-    //   }
-    //   throw error; // Rethrow for other unhandled errors
-    // }
-    const session = await this.userModel.db.startSession();
-    session.startTransaction();
+    // const session = await this.userModel.db.startSession();
+    // session.startTransaction();
     try {
+      const { userName, password } = createUserDto;
+
+      // Check if user already exists
+      await this.validateUserIsExists(userName);
+
       // Step 1: Create user profile
-      const createdUserProfile = await this.userProfileModel.create(
-        [
-          {
-            // email: createUserDto.email ?? null,
-            contactNumber: createUserDto.contactNumber,
-          },
-        ],
-        // { session },
-      );
+      const createdUserProfile = await this.createUserProfile(createUserDto);
 
       // Step 2: Create user and link profileId
-      const createdUser = await this.userModel.create(
-        [{ ...createUserDto, profileId: createdUserProfile[0]._id }],
-        // { session },
-      );
+      const createdUser = await this.createUser(createUserDto, password, createdUserProfile);
 
       // Step 3: Create user profile
-      await this.userProfileModel.findByIdAndUpdate(
-        createdUserProfile[0]._id,
-        { userId: createdUser[0]._id },
-      )
-        // .session(session)
-        .exec();
-
-      // Commit the transaction
-      // await session.commitTransaction();
+      this.updateUserProfile(createdUserProfile, createdUser);
 
       return createdUser[0];
     } catch (error) {
       // Rollback transaction in case of error
       // await session.abortTransaction();
+
+      // Check for validation errors
       if (error.name === 'ValidationError') {
         throw new BadRequestException(error.message); // Map to 400 error
       }
+
+      // Check for MongoDB E11000 Duplicate Key Error
+      if (error.code === 11000) {
+        const duplicateField = Object.keys(error.keyValue)[0]; // Extract the duplicate field
+        const duplicateValue = error.keyValue[duplicateField];
+        throw new ConflictException(
+          `Duplicate value detected: ${duplicateField} '${duplicateValue}' already exists.`,
+        );
+      }
+
       throw error; // Rethrow for other unhandled errors
     } finally {
-      session.endSession();
+      // session.endSession();
     }
   }
 
@@ -134,4 +120,54 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return this.userModel.find().exec();
   }
+
+  private async createUserProfile(createUserDto: UserDto): Promise<any> {
+    return await this.userProfileModel.create(
+      [
+        {
+          contactNumber: createUserDto.contactNumber,
+        },
+      ],
+    );
+  }
+
+  private async updateUserProfile(createdUserProfile: any, createdUser: any): Promise<any> {
+    await this.userProfileModel.findByIdAndUpdate(
+      createdUserProfile[0]._id,
+      { userId: createdUser[0]._id },
+    ).exec();
+  }
+
+  private async createUser(createUserDto: UserDto, password: string, createdUserProfile: any): Promise<any> {
+    // Generate salt and hash password
+    const { salt, passwordHash } = await BcryptUtils.hashPassword(password);
+    return await this.userModel.create(
+      [{
+        ...createUserDto,
+        passwordHash,
+        salt,
+        profileId: createdUserProfile[0]._id
+      }],
+    );
+  }
+
+  private async validatePassword(username: string, password: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ username }).exec();
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Compare the provided password with the stored hash
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    return isMatch;
+  }
+
+  // Validate user
+  private async validateUserIsExists(userName: string): Promise<any> {
+    const existingUser = await this.userModel.findOne({ userName }).exec();
+    if (existingUser) {
+      throw new BadRequestException('Username already exists');
+    }
+  }
+
 }

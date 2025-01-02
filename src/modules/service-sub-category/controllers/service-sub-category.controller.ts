@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ServiceSubCategoryService } from '../services/service-sub-category.service';
 import { ServiceSubCategoryDto } from '../dto/service-sub-category.dto';
+import { Public } from 'src/shared/decorators/public.decorator';
 
 @Controller('service-sub-categories')
 export class ServiceSubCategoryController {
@@ -16,6 +17,7 @@ export class ServiceSubCategoryController {
     private readonly serviceSubCategoryService: ServiceSubCategoryService,
   ) {}
 
+  @Public()
   @Post()
   create(@Body() createDto: ServiceSubCategoryDto) {
     return this.serviceSubCategoryService.create(createDto);
@@ -29,6 +31,16 @@ export class ServiceSubCategoryController {
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.serviceSubCategoryService.findById(id);
+  }
+
+  @Public()
+  @Get('/grouped-by-category/:serviceId')
+  getServiceSubCategoriesGroupedByCategory(
+    @Param('serviceId') serviceId: string,
+  ) {
+    return this.serviceSubCategoryService.getGroupedByServiceCategory(
+      serviceId,
+    );
   }
 
   @Put(':id')

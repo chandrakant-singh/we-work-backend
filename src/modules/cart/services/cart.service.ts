@@ -2,6 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+
 import { Cart } from '../schemas/cart.schema';
 import { AddToCartDto } from '../dtos/add-to-cart.dto';
 import { ServiceAttributesService } from 'src/modules/service-attributes/services/service-attributes.service';
@@ -14,9 +15,7 @@ export class CartService {
   ) {}
 
   async addToCart(userId: string, dto: AddToCartDto): Promise<Cart> {
-    const cart = await this.cartModel.findOne({
-      userId: new Types.ObjectId(userId),
-    });
+    const cart = await this.getExistingCart(userId);
 
     if (cart) {
       // Check if item exists in cart
@@ -46,22 +45,56 @@ export class CartService {
     return newCart.save();
   }
 
+  private async getExistingCart(userId: string): Promise<Cart> {
+    return await this.cartModel
+      .findOne({
+        userId: new Types.ObjectId(userId),
+      })
+      .exec();
+  }
+
   async getCart(userId: string): Promise<Cart> {
     const cart = await this.cartModel
-      .findOne({ userId })
+      .findOne({ userId: new Types.ObjectId(userId) })
       .populate('items.serviceSubCategoryId');
     if (!cart) throw new NotFoundException('Cart not found');
     return cart;
   }
 
-  async removeFromCart(
+  async delete(id: string): Promise<Cart> {
+    return this.cartModel.findByIdAndDelete(id).exec();
+  }
+
+  async removeItemFromCart(
     userId: string,
     serviceSubCategoryId: string,
-  ): Promise<void> {
-    await this.cartModel.updateOne(
-      { userId },
-      { $pull: { items: { serviceSubCategoryId } } },
+  ): Promise<any> {
+    console.log(userId, serviceSubCategoryId);
+    const cart = await this.getExistingCart(userId);
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+
+    // Check if item exists in cart
+    const item = cart.items.find(
+      (i) => i.serviceSubCategoryId.toString() === serviceSubCategoryId,
     );
+
+    if (!item) {
+      throw new NotFoundException('Item not found in cart');
+    }
+
+    if (item.quantity > 1) {
+      item.quantity -= 1;
+      return cart.save();
+    }
+
+    if (item.quantity === 1) {
+      cart.items = cart.items.filter(
+        (i) => i.serviceSubCategoryId.toString() !== serviceSubCategoryId,
+      );
+      return cart.save();
+    }
   }
 
   // Validate service-sub-groupId and get price

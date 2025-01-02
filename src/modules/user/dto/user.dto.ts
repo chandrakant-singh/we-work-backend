@@ -1,3 +1,4 @@
+import { Prop } from '@nestjs/mongoose';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -14,7 +15,12 @@ export class UserDto {
 
   @IsNotEmpty()
   @IsString()
-  passwordHash: string;
+  password: string;
+
+  // NOTE: TODO : Password hash from frontend will do in future
+  // @IsNotEmpty()
+  // @IsString()
+  // passwordHash: string;
 
   @IsOptional()
   @IsString()
@@ -22,7 +28,7 @@ export class UserDto {
 
   @IsOptional()
   @IsObject()
-  profile: string;
+  profileId: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -44,4 +50,7 @@ export class UserDto {
   @IsNotEmpty()
   @IsString()
   contactNumber: string;
+
+  @Prop()
+  _id: string;
 }

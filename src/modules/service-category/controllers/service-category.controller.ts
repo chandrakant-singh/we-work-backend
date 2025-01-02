@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ServiceCategoryService } from '../services/service-category.service';
 import { ServiceCategoryDto } from '../dto/service-category.dto';
+import { Public } from 'src/shared/decorators/public.decorator';
 
 @Controller('service-categories')
 export class ServiceCategoryController {
@@ -29,6 +30,12 @@ export class ServiceCategoryController {
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.serviceCategoryService.findById(id);
+  }
+
+  @Public()
+  @Get('service/:serviceId')
+  findByServiceId(@Param('serviceId') serviceId: string) {
+    return this.serviceCategoryService.findByServiceId(serviceId);
   }
 
   @Put(':id')

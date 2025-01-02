@@ -33,6 +33,18 @@ export class ServiceCategoryService {
     return serviceCategory;
   }
 
+  async findByServiceId(serviceId: string): Promise<ServiceCategory[]> {
+    const serviceCategory = await this.serviceCategoryModel
+      .find({ serviceId: new Types.ObjectId(serviceId) })
+      .exec();
+    if (!serviceCategory) {
+      throw new NotFoundException(
+        `serviceCategory with ServiceId ${serviceId} not found`,
+      );
+    }
+    return serviceCategory;
+  }
+
   async update(
     id: string,
     updateDto: ServiceCategoryDto,

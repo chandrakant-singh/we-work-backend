@@ -33,6 +33,26 @@ export class ServiceService {
     return service;
   }
 
+  async findByServiceGroupId(serviceGroupId: string): Promise<Service[]> {
+    const services = await this.serviceModel
+      .find({ serviceGroupId: new Types.ObjectId(serviceGroupId) })
+      .exec();
+    if (!services) {
+      throw new NotFoundException(
+        `Service with ServiceGroupId ${serviceGroupId} not found`,
+      );
+    }
+    return services;
+  }
+
+  async findByName(name: string): Promise<Service> {
+    const service = await this.serviceModel.findOne({ name }).exec();
+    if (!service) {
+      throw new NotFoundException(`Service with Name ${name} not found`);
+    }
+    return service;
+  }
+
   async update(id: string, updateDto: ServiceDto): Promise<Service> {
     const updatedService = await this.serviceModel.findByIdAndUpdate(
       id,

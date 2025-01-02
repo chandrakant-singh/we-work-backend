@@ -97,3 +97,84 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+
+
+
+
+async create(createUserDto: UserDto): Promise<User> {
+    const session = await this.userModel.db.startSession();
+    session.startTransaction();
+    try {
+      // Step 1: Create user profile
+      const createdUserProfile = await this.userProfileModel.create(
+        [
+          {
+            // email: createUserDto.email ?? null,
+            contactNumber: createUserDto.contactNumber,
+          },
+        ],
+        // { session },
+      );
+
+      // AUTH START
+      const { userName, password } = createUserDto;
+      // Check if user already exists
+      const existingUser = await this.userModel.findOne({ userName }).exec();
+      if (existingUser) {
+        throw new BadRequestException('Username already exists');
+      }
+
+      // Generate salt and hash password
+      const salt = await bcrypt.genSalt();
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      // AUTH END
+
+      // Step 2: Create user and link profileId
+      const createdUser = await this.userModel.create(
+        [{
+          ...createUserDto,
+          passwordHash,
+          salt,
+          profileId: createdUserProfile[0]._id
+        }],
+        // { session },
+      );
+
+      // Step 3: Create user profile
+      await this.userProfileModel.findByIdAndUpdate(
+        createdUserProfile[0]._id,
+        { userId: createdUser[0]._id },
+      )
+        // .session(session)
+        .exec();
+
+      // Commit the transaction
+      // await session.commitTransaction();
+
+      return createdUser[0];
+    } catch (error) {
+      // Rollback transaction in case of error
+      await session.abortTransaction();
+
+      if (error.name === 'ValidationError') {
+        throw new BadRequestException(error.message); // Map to 400 error
+      }
+
+      // Check for MongoDB E11000 Duplicate Key Error
+      if (error.code === 11000) {
+        const duplicateField = Object.keys(error.keyValue)[0]; // Extract the duplicate field
+        const duplicateValue = error.keyValue[duplicateField];
+        throw new ConflictException(
+          `Duplicate value detected: ${duplicateField} '${duplicateValue}' already exists.`,
+        );
+      }
+
+      throw error; // Rethrow for other unhandled errors
+    } finally {
+      session.endSession();
+    }
+  }

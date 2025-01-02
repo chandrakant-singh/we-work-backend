@@ -17,6 +17,8 @@ import { CartModule } from './modules/cart/cart.module';
 import { OrdersModule } from './modules/order/orders.module';
 import { QuotationsModule } from './modules/quotations/quotation.module';
 import mongoose from 'mongoose';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './core/auth/auth.guard';
 
 @Module({
   imports: [
@@ -43,7 +45,13 @@ import mongoose from 'mongoose';
     QuotationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {
   private readonly logger = new Logger(AppModule.name);

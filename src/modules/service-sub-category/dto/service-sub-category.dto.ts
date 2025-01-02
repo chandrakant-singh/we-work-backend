@@ -20,4 +20,8 @@ export class ServiceSubCategoryDto {
   @IsMongoId()
   @IsOptional()
   readonly serviceCategoryId?: string;
+
+  @IsMongoId()
+  @IsOptional()
+  readonly serviceId?: string;
 }

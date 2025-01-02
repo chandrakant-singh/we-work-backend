@@ -7,11 +7,13 @@ import {
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Public } from 'src/shared/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('login')
   async login(@Body() loginDto: { userName: string; password: string }) {
     console.log(loginDto);
@@ -27,6 +29,6 @@ export class AuthController {
 
   @Get()
   getHello(): string {
-    return 'Hemooo';
+    return 'Hello World!';
   }
 }

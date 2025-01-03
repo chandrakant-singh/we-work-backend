@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Param, Get, Delete } from '@nestjs/common';
+
 import { CartService } from '../services/cart.service';
 import { AddToCartDto } from '../dtos/add-to-cart.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
@@ -19,6 +20,12 @@ export class CartController {
   @Get('user/:userId')
   getCart(@Param('userId') userId: string) {
     return this.cartService.getCart(userId);
+  }
+
+  @Public()
+  @Get('user/:userId/sub-categories')
+  getCartWithPopulatedSubCategories(@Param('userId') userId: string) {
+    return this.cartService.getCartWithPopulatedSubCategories(userId);
   }
 
   @Delete(':id')

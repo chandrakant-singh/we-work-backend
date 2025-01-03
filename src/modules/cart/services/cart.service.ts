@@ -6,6 +6,7 @@ import { Model, Types } from 'mongoose';
 import { Cart } from '../schemas/cart.schema';
 import { AddToCartDto } from '../dtos/add-to-cart.dto';
 import { ServiceAttributesService } from 'src/modules/service-attributes/services/service-attributes.service';
+import { CartWithSubCategoryDto } from '../dtos/cart.dto';
 
 @Injectable()
 export class CartService {
@@ -54,6 +55,16 @@ export class CartService {
   }
 
   async getCart(userId: string): Promise<Cart> {
+    const cart = await this.cartModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
+    if (!cart) throw new NotFoundException('Cart not found');
+    return cart;
+  }
+
+  async getCartWithPopulatedSubCategories(
+    userId: string,
+  ): Promise<CartWithSubCategoryDto | Cart> {
     const cart = await this.cartModel
       .findOne({ userId: new Types.ObjectId(userId) })
       .populate('items.serviceSubCategoryId');

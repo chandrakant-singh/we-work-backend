@@ -62,6 +62,32 @@ export class UserProfileService {
     }
   }
 
+  async getUseProfileWithAddress(id: string): Promise<UserProfile> {
+    try {
+      const userProfile = await this.userProfileModel
+        .findById(id, { addresses: 1 })
+        .exec();
+      if (!userProfile) {
+        // Throwing NOT_FOUND error directly
+        throw new HttpException(
+          `UserProfile with ID ${id} not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      return userProfile;
+    } catch (error) {
+      // This catch block will handle actual errors, such as database connection issues
+      if (error instanceof HttpException) {
+        // Re-throw any HttpException without changing it
+        throw error;
+      }
+      throw new HttpException(
+        `Failed to retrieve userProfile: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findAll(): Promise<UserProfile[]> {
     return this.userProfileModel.find().exec();
   }

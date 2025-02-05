@@ -17,7 +17,7 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     console.log('USER FOUND: ', user);
-    console.log('isPasswordValid: ', isPasswordValid);
+    console.log('isPassword Valid: ', isPasswordValid);
 
     if (user && isPasswordValid) {
       return user;
@@ -40,7 +40,14 @@ export class AuthService {
       await this.validateToken(this.jwtService.sign(payload)),
     );
     return {
-      access_token: this.jwtService.sign(payload),
+      user: {
+        userName: user.userName,
+        role: user.role,
+        isActive: user.isActive,
+        profileId: user.profileId,
+        userId: user._id,
+      },
+      token: this.jwtService.sign(payload),
     };
   }
 

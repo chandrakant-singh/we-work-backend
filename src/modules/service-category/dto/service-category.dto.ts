@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsEnum, IsMongoId } from 'class-validator';
-import { Status } from 'src/shared/service/service.enum';
+import { Status } from 'src/shared/enum/service.enum';
 
 export class ServiceCategoryDto {
   @IsString({ message: 'Name must be a string' })

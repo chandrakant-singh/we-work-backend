@@ -1,9 +1,26 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class AddressDto {
   @IsNotEmpty()
   @IsString()
-  street: string;
+  fullName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  contactNumber: string;
+
+  /**
+   * addressLine1: Flat, House no., Building, Company, Apartment
+   */
+  @IsNotEmpty()
+  @IsString()
+  addressLine1: string;
 
   @IsNotEmpty()
   @IsString()
@@ -14,18 +31,30 @@ export class AddressDto {
   state: string;
 
   @IsNotEmpty()
-  @IsObject()
+  @IsString()
   country: string;
 
   @IsNotEmpty()
   @IsString()
   postalCode: string;
 
+  /**
+   * addressLine2: Area, Street, Sector, Village
+   */
+  @IsOptional()
+  @IsString()
+  addressLine2: string;
+
+  @IsOptional()
+  @IsString()
+  landmark: string;
+
+  @IsEnum(['home', 'work', 'other'])
   @IsOptional()
   @IsString()
   addressType: string;
 
-  @IsOptional()
-  @IsString()
-  profile: string;
+  @IsNotEmpty()
+  @IsMongoId()
+  profileId: string;
 }

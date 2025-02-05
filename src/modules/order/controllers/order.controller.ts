@@ -11,11 +11,13 @@ import { OrderService } from '../services/order.service';
 import { Order } from '../schemas/order.schema';
 import { UpdateOrderDto } from '../dtos/update-order.dto';
 import { CreateOrderDto } from '../dtos/create-order.dto';
+import { Public } from '../../../shared/decorators/public.decorator';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @Public()
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
     return this.orderService.create(createOrderDto);
@@ -29,6 +31,12 @@ export class OrderController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Order> {
     return this.orderService.findOne(id);
+  }
+
+  @Public()
+  @Get('lender/:lenderId')
+  findByUserId(@Param('lenderId') lenderId: string): Promise<Order[]> {
+    return this.orderService.findByUserId(lenderId);
   }
 
   @Put(':id')

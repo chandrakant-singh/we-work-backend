@@ -1,6 +1,6 @@
 import mongoose, { Document, Types } from 'mongoose';
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { Status } from 'src/shared/service/service.enum';
+import { Status } from 'src/shared/enum/service.enum';
 
 @Schema({ collection: 'service_sub_categories', timestamps: true })
 export class ServiceSubCategory extends Document {

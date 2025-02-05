@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { Status } from 'src/shared/service/service.enum';
+import { Status } from 'src/shared/enum/service.enum';
 
 @Schema({ collection: 'service_groups', timestamps: true })
 export class ServiceGroup extends Document {

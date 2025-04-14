@@ -19,6 +19,7 @@ import { SetPasswordDto } from '../dto/user-password.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @Post()
   async create(@Body() createUserDto: UserDto) {
     return this.userService.create(createUserDto);

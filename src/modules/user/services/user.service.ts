@@ -28,10 +28,10 @@ export class UserService {
     // const session = await this.userModel.db.startSession();
     // session.startTransaction();
     try {
-      const { userName, password } = createUserDto;
+      const { userName, password, contactNumber } = createUserDto;
 
       // Check if user already exists
-      await this.validateUserIsExists(userName);
+      await this.validateUserIsExists(userName ? userName : contactNumber);
 
       // Step 1: Create user profile
       const createdUserProfile = await this.createUserProfile(createUserDto);
@@ -159,6 +159,9 @@ export class UserService {
       [
         {
           contactNumber: createUserDto.contactNumber,
+          firstName: createUserDto.firstName,
+          lastName: createUserDto.lastName,
+          email: createUserDto.email
         },
       ],
     );

@@ -51,6 +51,14 @@ export class UserDto {
   @IsString()
   contactNumber: string;
 
+  @IsOptional()
+  @IsString()
+  firstName: string;
+
+  @IsOptional()
+  @IsString()
+  lastName: string;
+
   @Prop()
   _id: string;
 }
